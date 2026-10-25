@@ -116,9 +116,10 @@ async function cmdTry(f) {
 
   const local = phase.reduce((a, x) => a + x.local, 0);
   const row = (k, v) => out.write(`  ${dim(k.padEnd(18))}${wrap(v, 20)}\n`);
-  const rate = (x) => (x.local ? pct(x.right / x.local) : '—');
+  // Overall agreement, as certified: your API's own answers count as agreeing.
+  const rate = (x) => (x.calls ? pct(1 - (x.local - x.right) / x.calls) : '—');
   out.write(`\n  ${bold('Done.')} ${int(CALLS)} calls, ${int(local)} answered locally ${dim(`(${pct(local / CALLS, 0)})`)}.\n\n`);
-  row('agreement', `${rate(phase[0])} before the change, ${rate(phase[2])} after recovering ${dim('(checked on every local answer, which only a simulation can do)')}`);
+  row('agreement', `${rate(phase[0])} before the change, ${rate(phase[2])} after recovering ${dim('(overall, as certified; checked on every call, which only a simulation can do)')}`);
   if (p === 2) row('the change', `caught after ${int(phase[1].calls)} calls; ${int(phase[1].local - phase[1].right)} local answers were wrong in that window`);
   row('API calls saved', `${int(s.apiCallsSaved)} ${dim(`$${(s.apiCallsSaved * PRICE).toFixed(2)} and ${(s.apiCallsSaved * API_MS / 60_000).toFixed(0)} min of waiting, at the assumed price and latency`)}`);
   if (last) row('time per answer', `${last.latencyUs} µs locally, vs ${API_MS} ms from your API`);
