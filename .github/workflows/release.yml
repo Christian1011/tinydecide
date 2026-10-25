@@ -17,4 +17,11 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
       - run: npm test
-      - run: npm publish --provenance --access public
+      - name: Publish unless this version is already on npm
+        run: |
+          v=$(node -p "require('./package.json').version")
+          if npm view "tinydecide@$v" version > /dev/null 2>&1; then
+            echo "tinydecide@$v is already on npm"
+          else
+            npm publish --provenance --access public
+          fi
