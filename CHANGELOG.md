@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 — 2026-10-25
+
+- `guarantee: 'local'` no longer fails to certify when one of the few most confident calibration answers is mislabelled. Testing now starts at the first cutoff with enough local answers that an error rate of half the target would still certify (`localStart`), so one bad label among the top answers can't end the test sequence. The guarantee itself is unchanged.
+
 ## 0.1.0 — 2026-10-24
 
 First release.

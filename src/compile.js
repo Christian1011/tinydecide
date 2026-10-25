@@ -9,7 +9,7 @@
 import { Featurizer, inputKey } from './features.js';
 import { hashString } from './hash.js';
 import { Model, quantize, softmax, topTwo } from './model.js';
-import { certify, minCalibration, wilson } from './stats.js';
+import { certify, localStart, minCalibration, wilson } from './stats.js';
 import { RECIPE, abortError, tick, train } from './train.js';
 
 export const DEFAULTS = Object.freeze({ target: 0.98, delta: 0.05, guarantee: 'overall', calib: 0.25, test: 0.1, seed: 1, audit: 0.02 });
@@ -101,7 +101,7 @@ export async function compile(records, opts = {}) {
   const latencyUs = timeDecide(model, (split.test.length ? split.test : split.calib).slice(0, 400));
 
   const share = test ? test.share : calShare;
-  const minCal = minCalibration(alpha, o.delta);
+  const minCal = o.guarantee === 'local' ? localStart(alpha, o.delta) : minCalibration(alpha, o.delta);
   const verdict =
     cal.n < minCal ? 'need-more-data' : calShare >= 0.25 ? 'ship' : calShare >= 0.05 ? 'marginal' : 'not-worth-it';
   const report = {

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { rng } from '../src/hash.js';
-import { binomCdf, certify, minCalibration, wilson } from '../src/stats.js';
+import { binomCdf, certify, localStart, minCalibration, wilson } from '../src/stats.js';
 
 test('binomial cdf matches direct sums', () => {
   const direct = (k, n, p) => { let s = 0, c = 1; for (let i = 0; i <= k; i++) { s += c * p ** i * (1 - p) ** (n - i); c *= (n - i) / (i + 1); } return s; };
@@ -20,6 +20,37 @@ test('wilson interval brackets the estimate', () => {
 test('minimum calibration size for an error-free certificate', () => {
   assert.equal(minCalibration(0.02, 0.05), 149);
   assert.equal(minCalibration(0.05, 0.05), 59);
+});
+
+test('the local guarantee starts testing where one stray error cannot end it', () => {
+  for (const [alpha, delta] of [[0.02, 0.05], [0.04, 0.05], [0.05, 0.1]]) {
+    const m = localStart(alpha, delta);
+    assert.ok(m >= minCalibration(alpha, delta));
+    assert.ok(binomCdf(Math.floor((m * alpha) / 2), m, alpha) <= delta);
+    assert.ok(binomCdf(Math.floor(((m - 1) * alpha) / 2), m - 1, alpha) > delta);
+  }
+  // Clean scores, except that the single most confident row is mislabelled.
+  const n = 3000, rand = rng(5), score = new Float64Array(n), wrong = new Uint8Array(n);
+  for (let i = 0; i < n; i++) { score[i] = rand(); wrong[i] = score[i] < 0.4 && rand() < 0.3 ? 1 : 0; }
+  wrong[score.indexOf(Math.max(...score))] = 1;
+  const grid = Array.from({ length: 201 }, (_, i) => i / 200);
+  const { cutoff, local } = certify(score, wrong, grid, { alpha: 0.04, delta: 0.05, guarantee: 'local' });
+  assert.ok(Number.isFinite(cutoff) && local / n > 0.4, `cutoff ${cutoff}, local ${local}`);
+});
+
+test('local certificates keep the error rate on local answers under alpha at least 1 − delta of the time', () => {
+  // score ~ U(0,1); P(wrong | s) = 0.2·(1 − s); error rate among answers with score ≥ τ is 0.1·(1 − τ).
+  const alpha = 0.04, delta = 0.05, trials = 300, n = 3000;
+  const grid = Array.from({ length: 201 }, (_, i) => i / 200);
+  const rand = rng(17);
+  let violations = 0;
+  for (let t = 0; t < trials; t++) {
+    const score = new Float64Array(n), wrong = new Uint8Array(n);
+    for (let i = 0; i < n; i++) { score[i] = rand(); wrong[i] = rand() < 0.2 * (1 - score[i]) ? 1 : 0; }
+    const { cutoff } = certify(score, wrong, grid, { alpha, delta, guarantee: 'local' });
+    if (Number.isFinite(cutoff) && 0.1 * (1 - Math.min(1, cutoff)) > alpha) violations++;
+  }
+  assert.ok(violations / trials <= delta + 0.02, `violation rate ${violations / trials}`);
 });
 
 test('certified cutoffs keep the true risk under alpha at least 1 − delta of the time', () => {

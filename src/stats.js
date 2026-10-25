@@ -43,10 +43,11 @@ export function certify(score, wrong, grid, { alpha, delta = 0.05, guarantee = '
   const n = score.length;
   const order = Array.from(score.keys()).sort((i, j) => score[j] - score[i]);
   const cuts = [...new Set(grid)].sort((a, b) => b - a);
-  // For the local guarantee, cutoffs that answer fewer rows than an error-free sample needs are
-  // skipped rather than failed. Which cutoffs are skipped depends only on the scores, never on the
-  // errors, so the test sequence is still fixed given the scores.
-  const floor = guarantee === 'local' ? minCalibration(alpha, delta) : 1;
+  // For the local guarantee, testing starts at the first cutoff that answers localStart() rows:
+  // starting at the bare minimum fails the whole sequence on a single mislabelled row among the most
+  // confident few. Which cutoffs are skipped depends only on the scores, never on the errors, so the
+  // test sequence is still fixed given the scores.
+  const floor = guarantee === 'local' ? localStart(alpha, delta) : 1;
   let best = { cutoff: Infinity, local: 0, errors: 0, pValue: 0, tested: 0 };
   let i = 0, local = 0, errors = 0;
   for (let c = 0; c < cuts.length; c++) {
@@ -59,6 +60,16 @@ export function certify(score, wrong, grid, { alpha, delta = 0.05, guarantee = '
     best = { cutoff: cut, local, errors, pValue, tested: c + 1 };
   }
   return best;
+}
+
+/**
+ * Local answers needed before the local guarantee starts testing: the smallest sample on which an
+ * error rate of half the budget would still certify, so one stray label error cannot end the test.
+ */
+export function localStart(alpha, delta = 0.05) {
+  let m = minCalibration(alpha, delta);
+  while (binomCdf(Math.floor((m * alpha) / 2), m, alpha) > delta) m++;
+  return m;
 }
 
 /** Smallest calibration size at which an error-free sample can certify alpha at level delta. */

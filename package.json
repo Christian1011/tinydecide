@@ -1,6 +1,6 @@
 {
   "name": "tinydecide",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Wrap your decision API. TinyDecide learns from its answers and takes over the calls it can answer locally, in microseconds, with agreement certified.",
   "keywords": [
     "classification",
