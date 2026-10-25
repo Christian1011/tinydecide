@@ -1,27 +1,36 @@
-# Publishes to npm when a version tag is pushed, with provenance, through npm trusted publishing
-# (no token): configure it once at npmjs.com → tinydecide → Settings → Trusted publishing.
+# Stages a release on npm when a version tag is pushed. Nothing goes public until a maintainer
+# approves it with 2FA, at npmjs.com → Staged Packages or with `npm stage approve <id>`.
+#
+# Auth is npm trusted publishing (OIDC, no stored token), bound to this file and the `npm`
+# environment, which only v* tags can deploy to. npm adds provenance automatically.
 name: release
 on:
   push:
     tags: ['v*']
 permissions:
   contents: read
-  id-token: write
 jobs:
-  publish:
+  stage:
     runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: 24
+          node-version: 26
           registry-url: https://registry.npmjs.org
+      - run: npm install -g npm@11.19.0
+      - name: Check the tag matches package.json
+        run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
       - run: npm test
-      - name: Publish unless this version is already on npm
+      - name: Stage unless this version is already on npm
         run: |
           v=$(node -p "require('./package.json').version")
           if npm view "tinydecide@$v" version > /dev/null 2>&1; then
             echo "tinydecide@$v is already on npm"
           else
-            npm publish --provenance --access public
+            npm stage publish --access public
           fi

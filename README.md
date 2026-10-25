@@ -1,5 +1,7 @@
 # TinyDecide
 
+[![npm](https://img.shields.io/npm/v/tinydecide)](https://www.npmjs.com/package/tinydecide) [![test](https://github.com/Christian1011/tinydecide/actions/workflows/test.yml/badge.svg)](https://github.com/Christian1011/tinydecide/actions/workflows/test.yml) [![bundle size](https://img.shields.io/badge/browser-12%20KB%20gzipped-blue)](#how-it-works) [![license](https://img.shields.io/npm/l/tinydecide)](LICENSE)
+
 Wrap your decision API. TinyDecide learns from its answers and takes over the calls it can answer locally, in microseconds, with agreement certified.
 
 ```sh
@@ -244,6 +246,8 @@ npm run bench:guard    # how fast the guard catches an API change, over 10 runs
 ```
 
 No dependencies, by design. Issues and pull requests are welcome; please run the tests first. Security reports go through [SECURITY.md](SECURITY.md).
+
+To release: bump `version` in package.json, add a CHANGELOG entry, and push a `vX.Y.Z` tag. CI runs the tests and stages the version on npm, and it goes public once a maintainer approves it with 2FA.
 
 ## License
 
