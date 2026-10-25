@@ -49,10 +49,10 @@
     "node": ">=22"
   },
   "scripts": {
-    "test": "node --test test/",
-    "test:bun": "bun test test/",
+    "test": "node --test \"test/*.test.js\"",
+    "test:bun": "bun test ./test/",
     "typecheck": "tsc -p test/tsconfig.json",
     "bench:guard": "node bench/guard-drift.js change 10",
-    "prepublishOnly": "node --test test/"
+    "prepublishOnly": "npm test"
   }
 }

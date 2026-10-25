@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: oven-sh/setup-bun@v2
-      - run: bun test test/
+      - run: bun test ./test/
       - run: bun bin/tinydecide.js try --calls 3000 --rate 100000
   types:
     runs-on: ubuntu-latest
