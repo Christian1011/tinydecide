@@ -1,0 +1,16 @@
+node_modules/
+.tinydecide/
+*.tdm
+*.tgz
+.DS_Store
+
+# Research benchmarks: they need recorded traffic that is not distributed, so they stay local.
+.data/
+bench/.data/
+bench/replay.js
+bench/live.js
+bench/guard-false-alarms.js
+bench/results/replay-*
+bench/results/live-*
+bench/results/*.log
+demo/
