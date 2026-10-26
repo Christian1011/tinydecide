@@ -1,0 +1,58 @@
+{
+  "name": "tinydecide",
+  "version": "0.1.2",
+  "description": "Wrap your decision API. TinyDecide learns from its answers and takes over the calls it can answer locally, in microseconds, with agreement certified.",
+  "keywords": [
+    "classification",
+    "classifier",
+    "llm",
+    "distillation",
+    "cost",
+    "latency",
+    "routing",
+    "conformal",
+    "edge",
+    "bun"
+  ],
+  "author": "Christian Yun",
+  "license": "MIT",
+  "homepage": "https://github.com/Christian1011/tinydecide#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Christian1011/tinydecide.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Christian1011/tinydecide/issues"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "browser": "./src/index.js",
+      "node": "./src/node.js",
+      "default": "./src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./types/index.d.ts",
+  "bin": {
+    "tinydecide": "./bin/tinydecide.js"
+  },
+  "files": [
+    "src",
+    "bin",
+    "types",
+    "examples/support-api.js"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "test:bun": "bun test ./test/",
+    "typecheck": "npx -y -p typescript@5.9.3 tsc -p test/tsconfig.json",
+    "bench:guard": "node bench/guard-drift.js change 10",
+    "prepublishOnly": "npm test"
+  }
+}
